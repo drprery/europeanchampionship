@@ -4,38 +4,23 @@ import kotlin.math.abs
 
 class GameService(private var gameRepository: GameRepository) {
 
+    var result: HashMap<String, Int> = HashMap()
+    var actual: Int = 0
+    var maxBattle: Int = 0
+    var country: String = "Nincs"
+
     fun getGameWithMostGoalDifference(): Game? {
         return gameRepository.getGames().maxByOrNull { abs((it.firstCountryScore) - (it.secondCountryScore)) }
     }
 
     fun getCountryWithMostGoals(): String {
-        var result: HashMap<String, Int> = HashMap()
-        var actual: Int = 0
-        var maxBattle: Int = 0
-        var country: String = "Nincs"
+        actual = 0
+        maxBattle = 0
+        country = "Nincs"
 
         for (game in gameRepository.getGames()) {
-            if (!result.containsKey(game.firstCountry)) {
-                result[game.firstCountry] = game.firstCountryScore
-            } else {
-                actual = result[game.firstCountry]!!
-                result.replace(game.firstCountry, actual + game.firstCountryScore)
-                if (actual > maxBattle) {
-                    maxBattle = 2 * actual + game.firstCountryScore
-                    country = game.firstCountry
-                }
-            }
-
-            if (!result.containsKey(game.secondCountry)) {
-                result[game.secondCountry] = game.secondCountryScore
-            } else {
-                actual = result[game.secondCountry]!!
-                result.replace(game.secondCountry, actual + game.secondCountryScore)
-                if (actual > maxBattle) {
-                    maxBattle = 2 * actual + game.secondCountryScore
-                    country = game.secondCountry
-                }
-            }
+            resultUpdate(game.firstCountry, game.firstCountryScore)
+            resultUpdate(game.secondCountry, game.secondCountryScore)
         }
         return country
     }
@@ -55,5 +40,18 @@ class GameService(private var gameRepository: GameRepository) {
 
     fun getGameRepository(): GameRepository {
         return gameRepository
+    }
+
+    private fun resultUpdate(key: String, value: Int) {
+        if (!result.containsKey(key)) {
+            result[key] = value
+        } else {
+            actual = result[key]!!
+            result.replace(key, actual + value)
+            if (actual > maxBattle) {
+                maxBattle = 2 * actual + value
+                country = key
+            }
+        }
     }
 }
